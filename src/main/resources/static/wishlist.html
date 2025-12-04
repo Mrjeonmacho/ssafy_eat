@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 찜 리스트</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-bottom: 25px; }
+        .wishlist-item { border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 15px; background-color: #f9f9f9; display: flex; justify-content: space-between; align-items: center; }
+        .wishlist-item h3 { margin: 0 0 5px 0; color: #007bff; }
+        .wishlist-item p { margin: 0; color: #555; font-size: 0.9em; }
+        .remove-button { background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: background-color 0.3s ease; }
+        .remove-button:hover { background-color: #c82333; }
+        .no-items { text-align: center; color: #777; font-size: 1.1em; padding: 30px; }
+        .back-button { display: block; width: fit-content; margin: 20px auto; padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px; transition: background-color 0.3s ease; }
+        .back-button:hover { background-color: #5a6268; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>내 찜 리스트</h2>
+        <div id="wishlist-container">
+            <!-- Wishlist items will be loaded here -->
+            <p class="no-items">찜한 맛집이 없습니다.</p>
+        </div>
+        <a href="/main.html" class="back-button">메인으로 돌아가기</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const userId = localStorage.getItem('userId');
+            const wishlistContainer = document.getElementById('wishlist-container');
+
+            if (!userId) {
+                alert('로그인이 필요합니다.');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            await fetchWishlist(userId);
+        });
+
+        async function fetchWishlist(userId) {
+            const wishlistContainer = document.getElementById('wishlist-container');
+            wishlistContainer.innerHTML = ''; // Clear previous content
+
+            try {
+                const response = await fetch(`/api/users/${userId}/wishlist`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch wishlist: ${response.statusText}`);
+                }
+                const wishlist = await response.json();
+
+                if (wishlist.length === 0) {
+                    wishlistContainer.innerHTML = '<p class="no-items">찜한 맛집이 없습니다.</p>';
+                    return;
+                }
+
+                wishlist.forEach(item => {
+                    const wishlistItem = document.createElement('div');
+                    wishlistItem.className = 'wishlist-item';
+                    wishlistItem.innerHTML = `
+                        <div>
+                            <h3>${item.name}</h3>
+                            <p>${item.cuisineType} | ${item.address}</p>
+                        </div>
+                        <button class="remove-button" data-restaurant-id="${item.id}">찜 해제</button>
+                    `;
+                    wishlistContainer.appendChild(wishlistItem);
+                });
+
+                // Add event listeners to remove buttons
+                wishlistContainer.querySelectorAll('.remove-button').forEach(button => {
+                    button.addEventListener('click', async function() {
+                        const restaurantId = this.dataset.restaurantId;
+                        await removeWishlistItem(userId, restaurantId);
+                    });
+                });
+
+            } catch (error) {
+                wishlistContainer.innerHTML = `<p class="no-items error">찜 목록을 불러오는데 실패했습니다: ${error.message}</p>`;
+                console.error('Error fetching wishlist:', error);
+            }
+        }
+
+        async function removeWishlistItem(userId, restaurantId) {
+            try {
+                const response = await fetch(`/api/users/${userId}/wishlist/${restaurantId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('찜 목록에서 맛집이 해제되었습니다.');
+                    await fetchWishlist(userId); // Re-fetch wishlist to update the list
+                } else {
+                    alert('찜 해제 실패: ' + (await response.text()));
+                }
+            } catch (error) {
+                alert('네트워크 오류로 찜 해제에 실패했습니다.');
+                console.error('Error removing wishlist item:', error);
+            }
+        }
+    </script>
+</body>
+</html>

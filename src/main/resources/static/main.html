@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메인 페이지</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f4; margin: 0; }
+        .main-container { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 400px; text-align: center; }
+        h2 { margin-bottom: 20px; color: #333; }
+        .welcome-message { margin-bottom: 25px; font-size: 1.2em; color: #555; }
+        .button-group a, button {
+            display: block;
+            width: 80%;
+            margin: 10px auto;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .button-group a.view-restaurants { background-color: #28a745; }
+        .button-group a.view-restaurants:hover { background-color: #218838; }
+        .button-group a.view-wishlist { background-color: #007bff; }
+        .button-group a.view-wishlist:hover { background-color: #0056b3; }
+        button.logout-button { background-color: #dc3545; margin-top: 30px; }
+        button.logout-button:hover { background-color: #c82333; }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h2 class="welcome-message">환영합니다, <span id="username-display"></span>님!</h2>
+        <div class="button-group">
+            <a href="/index.html" class="view-restaurants">맛집 보기</a>
+            <a href="/wishlist.html" class="view-wishlist">내 찜 리스트 보기</a>
+        </div>
+        <button id="logout-button" class="logout-button">로그아웃</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userId = localStorage.getItem('userId');
+            const username = localStorage.getItem('username');
+            const usernameDisplay = document.getElementById('username-display');
+            const logoutButton = document.getElementById('logout-button');
+
+            if (!userId || !username) {
+                alert('로그인이 필요합니다.');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            usernameDisplay.textContent = username;
+
+            logoutButton.addEventListener('click', function() {
+                localStorage.removeItem('userId');
+                localStorage.removeItem('username');
+                alert('로그아웃 되었습니다.');
+                window.location.href = '/login.html';
+            });
+        });
+    </script>
+</body>
+</html>
