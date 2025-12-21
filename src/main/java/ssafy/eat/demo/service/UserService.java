@@ -53,7 +53,7 @@ public class UserService {
     }
 
     @Transactional
-    public Set<RestaurantDetailDto> addRestaurantToWishlist(Long userId, Long restaurantId) {
+    public void addRestaurantToWishlist(Long userId, Long restaurantId) {
         userWishlists.putIfAbsent(userId, new HashSet<>());
 
         Optional<RestaurantDetailDto> restaurantOptional = restaurantService.getRestaurantById(restaurantId);
@@ -62,8 +62,10 @@ public class UserService {
         }
         RestaurantDetailDto restaurant = restaurantOptional.get();
 
-        userWishlists.get(userId).add(restaurant);
-        return userWishlists.get(userId);
+        boolean added = userWishlists.get(userId).add(restaurant);
+        if (!added) {
+            throw new IllegalArgumentException("이미 찜한 식당입니다.");
+        }
     }
 
     @Transactional

@@ -14,6 +14,7 @@ import lombok.EqualsAndHashCode;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class RestaurantDetailDto {
     private Long id;
     private String name;

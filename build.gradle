@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.5'
 	id 'io.spring.dependency-management' version '1.1.5'
+	id 'com.github.node-gradle.node' version '7.0.2' // Node.js Gradle Plugin
 }
 
 group = 'ssafy.eat'
@@ -30,3 +31,43 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// =======================================
+// Node.js Gradle Plugin Configuration
+// =======================================
+//node {
+//	version = "24.11.1"      // ✅ Vite 요구 사항 충족
+//	npmVersion = "11.6.2"    // 최신 안정 NPM
+//	download = true           // Gradle이 Node를 다운로드
+//	workDir = file("${projectDir}/.gradle/nodejs")       // Node 설치 위치
+//	npmWorkDir = file("${projectDir}/.gradle/npm")      // NPM 설치 위치
+//}
+
+// =======================================
+// Task to build the Vue.js application
+// =======================================
+task npmBuild(type: com.github.gradle.node.npm.task.NpmTask) {
+	dependsOn tasks.named("npmInstall")
+	workingDir = file("${projectDir}/src/main/frontend")
+	args = ['run', 'build']
+}
+
+// =======================================
+// Include Vue build artifacts in Spring Boot resources
+// =======================================
+processResources {
+	dependsOn npmBuild
+	from("${projectDir}/src/main/frontend/dist") {
+		into 'static'
+	}
+}
+
+// =======================================
+// Ensure clean task also cleans frontend artifacts
+// =======================================
+//tasks.named('clean') {
+//	delete "${projectDir}/src/main/frontend/node_modules"
+//	delete "${projectDir}/src/main/frontend/dist"
+//	delete "${projectDir}/.gradle/nodejs"
+//	delete "${projectDir}/.gradle/npm"
+//}

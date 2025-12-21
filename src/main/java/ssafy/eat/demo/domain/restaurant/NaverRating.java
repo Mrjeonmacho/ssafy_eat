@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class NaverRating {
 
     @Id
@@ -24,9 +23,9 @@ public class NaverRating {
     @Column(updatable = false)
     private LocalDateTime ratedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "restaurant_id", nullable = false)
-    private Restaurant restaurant;
+    public NaverRating(Double rating) {
+        this.rating = rating;
+    }
 
     @PrePersist
     protected void onCreate() {

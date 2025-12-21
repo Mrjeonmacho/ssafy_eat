@@ -52,6 +52,9 @@ public class UserController {
             userService.addRestaurantToWishlist(userId, restaurantId);
             return new ResponseEntity<>("Restaurant added to wishlist successfully", HttpStatus.OK);
         } catch (IllegalArgumentException e) {
+            if ("이미 찜한 식당입니다.".equals(e.getMessage())) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            }
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }

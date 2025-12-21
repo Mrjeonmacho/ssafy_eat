@@ -40,16 +40,27 @@ public class Restaurant {
 
 
 
-    @Builder.Default
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<NaverRating> naverRatings = new ArrayList<>();
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "naver_rating_id")
+    private NaverRating naverRating;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<KakaoRating> kakaoRatings = new ArrayList<>();
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "kakao_rating_id")
+    private KakaoRating kakaoRating;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<GoogleRating> googleRatings = new ArrayList<>();
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "google_rating_id")
+    private GoogleRating googleRating;
 
+    public NaverRating getNaverRating() {
+        return naverRating;
+    }
+
+    public KakaoRating getKakaoRating() {
+        return kakaoRating;
+    }
+
+    public GoogleRating getGoogleRating() {
+        return googleRating;
+    }
 }

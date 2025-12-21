@@ -48,13 +48,16 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
     
     private RestaurantDto mapToSimpleDto(Restaurant r) {
-        // 단순화된 매핑: 현재는 평점을 0.0으로 반환합니다.
-        // 향후 r.getNaverRatings() 등을 통해 평균을 계산하는 로직 추가 가능
-        return new RestaurantDto(r.getId(), r.getName(), r.getAddress(), r.getCuisineType(), 0.0, 0.0, 0.0, r.getLatitude(), r.getLongitude());
+        double naverRating = Optional.ofNullable(r.getNaverRating()).map(nr -> nr.getRating()).orElse(0.0);
+        double kakaoRating = Optional.ofNullable(r.getKakaoRating()).map(kr -> kr.getRating()).orElse(0.0);
+        double googleRating = Optional.ofNullable(r.getGoogleRating()).map(gr -> gr.getRating()).orElse(0.0);
+        return new RestaurantDto(r.getId(), r.getName(), r.getAddress(), r.getCuisineType(), naverRating, kakaoRating, googleRating, r.getLatitude(), r.getLongitude());
     }
     
     private RestaurantDetailDto mapToDetailDto(Restaurant r) {
-        // 단순화된 매핑: 현재는 평점을 0.0으로 반환합니다.
-        return new RestaurantDetailDto(r.getId(), r.getName(), r.getAddress(), r.getPhone(), r.getDescription(), r.getCuisineType(), 0.0, 0.0, 0.0, r.getLatitude(), r.getLongitude());
+        double naverRating = Optional.ofNullable(r.getNaverRating()).map(nr -> nr.getRating()).orElse(0.0);
+        double kakaoRating = Optional.ofNullable(r.getKakaoRating()).map(kr -> kr.getRating()).orElse(0.0);
+        double googleRating = Optional.ofNullable(r.getGoogleRating()).map(gr -> gr.getRating()).orElse(0.0);
+        return new RestaurantDetailDto(r.getId(), r.getName(), r.getAddress(), r.getPhone(), r.getDescription(), r.getCuisineType(), naverRating, kakaoRating, googleRating, r.getLatitude(), r.getLongitude());
     }
 }
