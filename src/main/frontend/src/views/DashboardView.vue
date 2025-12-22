@@ -106,165 +106,329 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
+
+
 :root {
-  --primary-color: #007bff;
-  --secondary-color: #6c757d;
-  --background-color: #f8f9fa;
+
+  --primary-color: #3498db;
+
+  --secondary-color: #95a5a6;
+
+  --background-color: #ecf0f1;
+
   --card-bg-color: #ffffff;
-  --text-color: #343a40;
-  --light-text-color: #f8f9fa;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  --text-color: #2c3e50;
+
+  --light-text-color: #ffffff;
+
+  --shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+
+  --ranking-1: #ffd700;
+
+  --ranking-2: #c0c0c0;
+
+  --ranking-3: #cd7f32;
+
 }
 
-body {
-  font-family: 'Noto Sans KR', sans-serif;
-  background-color: var(--background-color);
-  margin: 0;
-  padding: 20px;
-  color: var(--text-color);
-}
+
 
 .dashboard-container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-}
-
-.header-title {
-  font-size: 2.5em;
-  font-weight: 700;
-  color: var(--primary-color);
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-/* #username-display is now handled by Vue binding */
-
-.logout-button {
-  background: var(--secondary-color);
-  color: var(--light-text-color);
-  border: none;
-  padding: 10px 15px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.9em;
-  transition: background-color 0.3s ease;
-}
-
-.logout-button:hover {
-  background: #5a6268;
-}
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 25px;
-}
-
-.card {
-  background: var(--card-bg-color);
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: var(--shadow);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  text-decoration: none;
+  font-family: 'Noto Sans KR', sans-serif;
+  background-color: var(--background-color);
+  min-height: 100vh;
+  padding: 30px;
   color: var(--text-color);
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
+
+.header, .card-grid {
+    width: 100%;
+    max-width: 1200px;
+}
+
+
+
+.header {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 40px;
+
+}
+
+
+
+.header-title {
+
+  font-size: 2.8em;
+
+  font-weight: 700;
+
+  color: var(--primary-color);
+
+}
+
+
+
+.user-info {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+
+  font-size: 1.1em;
+
+}
+
+
+
+.logout-button {
+
+  background: var(--secondary-color);
+
+  color: var(--light-text-color);
+
+  border: none;
+
+  padding: 10px 20px;
+
+  border-radius: 25px;
+
+  cursor: pointer;
+
+  font-size: 0.9em;
+
+  font-weight: 700;
+
+  transition: background-color 0.3s ease;
+
+}
+
+
+
+.logout-button:hover {
+
+  background: #7f8c8d;
+
+}
+
+
+
+.card-grid {
+
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+
+  gap: 30px;
+
+}
+
+
+
+.card {
+
+  background: var(--card-bg-color);
+
+  border-radius: 15px;
+
+  padding: 30px;
+
+  box-shadow: var(--shadow);
+
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  text-decoration: none;
+
+  color: var(--text-color);
+
+  display: flex;
+
+  flex-direction: column;
+
+}
+
+
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+
+  transform: translateY(-8px);
+
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+
 }
+
+
 
 .card-title {
-  font-size: 1.5em;
+
+  font-size: 1.6em;
+
   font-weight: 700;
-  margin: 0 0 10px 0;
+
+  margin: 0 0 12px 0;
+
 }
+
+
 
 .card-description {
-  font-size: 1em;
-  color: #6c757d;
+
+  font-size: 1.05em;
+
+  color: #7f8c8d;
+
+  line-height: 1.6;
+
   flex-grow: 1;
-  margin-bottom: 20px;
+
+  margin-bottom: 25px;
+
 }
+
+
 
 .card-icon {
-  font-size: 2.5em;
+
+  font-size: 3em;
+
   text-align: right;
-  color: var(--primary-color);
-  opacity: 0.8;
+
+  opacity: 0.9;
+
 }
+
+
 
 .nav-card .card-icon {
+
   color: var(--primary-color);
+
 }
+
+
 
 .wishlist-card .card-icon {
-  color: #fd7e14; /* Orange */
+
+  color: #e74c3c;
+
 }
+
+
 
 .ranking-card {
-  grid-column: 1 / -1; /* Make ranking card span full width */
+
+  grid-column: 1 / -1;
+
 }
+
+
 
 .ranking-list {
+
   list-style: none;
+
   padding: 0;
+
   margin: 0;
+
 }
+
+
 
 .ranking-item {
+
   display: flex;
+
   align-items: center;
-  padding: 15px 10px;
-  border-bottom: 1px solid #eee;
+
+  padding: 18px 12px;
+
+  border-bottom: 1px solid #ecf0f1;
+
+  transition: background-color 0.2s ease;
+
 }
+
+.ranking-item:hover{
+
+    background-color: #f7f9f9;
+
+}
+
+
 
 .ranking-item:last-child {
+
   border-bottom: none;
+
 }
+
+
 
 .rank {
-  font-size: 1.5em;
+
+  font-size: 1.6em;
+
   font-weight: 700;
-  color: var(--secondary-color);
-  width: 40px;
+
+  width: 50px;
+
   text-align: center;
+
 }
 
-.rank.top-1 {
-  color: #ffbf00;
-} /* Gold */
-.rank.top-2 {
-  color: #c0c0c0;
-} /* Silver */
-.rank.top-3 {
-  color: #cd7f32;
-} /* Bronze */
+
+
+.rank.top-1 { color: var(--ranking-1); }
+
+.rank.top-2 { color: var(--ranking-2); }
+
+.rank.top-3 { color: var(--ranking-3); }
+
+
 
 .restaurant-info {
+
   flex-grow: 1;
-  margin-left: 15px;
+
+  margin-left: 20px;
+
 }
+
+
+
 .restaurant-name {
+
   font-weight: 700;
-  font-size: 1.1em;
+
+  font-size: 1.2em;
+
 }
+
+
+
 .restaurant-rating {
-  font-size: 0.9em;
-  color: #6c757d;
+
+  font-size: 0.95em;
+
+  color: #7f8c8d;
+
+  margin-top: 5px;
+
 }
+
 </style>

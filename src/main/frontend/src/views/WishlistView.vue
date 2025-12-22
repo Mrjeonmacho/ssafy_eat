@@ -86,95 +86,107 @@ onMounted(() => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
 .wishlist-view-container {
   font-family: 'Noto Sans KR', sans-serif;
-  background-color: #f8f9fa;
-  margin: 0;
-  padding: 20px;
+  background-color: #ecf0f1;
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  padding: 30px;
 }
 
 .container {
-  max-width: 800px;
-  width: 100%;
-  margin: 20px auto;
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
+
 h2 {
   text-align: center;
-  color: #343a40;
-  margin-bottom: 25px;
-  font-size: 2em;
+  color: #2c3e50;
+  margin-bottom: 35px;
+  font-size: 2.2em;
   font-weight: 700;
 }
+
 .wishlist-items-wrapper {
-  min-height: 100px;
+  min-height: 150px;
 }
+
 .wishlist-item {
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
-  background-color: #ffffff;
+  border-bottom: 1px solid #ecf0f1;
+  padding: 20px 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s ease;
 }
+
+.wishlist-item:hover {
+  background-color: #f7f9f9;
+}
+
+.wishlist-item:last-child {
+  border-bottom: none;
+}
+
 .wishlist-item h3 {
-  margin: 0 0 5px 0;
-  color: #007bff;
-  font-size: 1.2em;
+  margin: 0 0 8px 0;
+  color: #3498db;
+  font-size: 1.3em;
   font-weight: 700;
 }
+
 .wishlist-item p {
   margin: 0;
-  color: #6c757d;
-  font-size: 0.9em;
+  color: #7f8c8d;
+  font-size: 1em;
 }
+
 .remove-button {
-  background-color: #dc3545;
+  background-color: #e74c3c;
   color: white;
   border: none;
-  padding: 8px 15px;
-  border-radius: 5px;
+  padding: 10px 18px;
+  border-radius: 25px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
   font-size: 0.9em;
   font-weight: 700;
 }
+
 .remove-button:hover {
-  background-color: #c82333;
-  transform: translateY(-1px);
+  background-color: #c0392b;
+  transform: translateY(-2px);
 }
+
 .no-items {
   text-align: center;
-  color: #777;
-  font-size: 1.1em;
-  padding: 30px;
-  background-color: #f0f2f5;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  color: #95a5a6;
+  font-size: 1.2em;
+  padding: 40px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  margin-bottom: 30px;
 }
+
 .back-button {
   display: block;
   width: fit-content;
-  margin: 20px auto 0;
-  padding: 10px 20px;
-  background-color: #6c757d;
+  margin: 30px auto 0;
+  padding: 12px 25px;
+  background-color: #95a5a6;
   color: white;
   text-decoration: none;
-  border-radius: 5px;
+  border-radius: 25px;
   transition: background-color 0.3s ease;
   font-weight: 700;
 }
+
 .back-button:hover {
-  background-color: #5a6268;
+  background-color: #7f8c8d;
 }
 </style>

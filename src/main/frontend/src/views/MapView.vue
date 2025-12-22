@@ -14,15 +14,21 @@
           <div class="panel-section">
             <h3>⭐ 평점 정보</h3>
             <div class="info-item rating-item">
-              <div class="rating-source"><i class="fa-solid fa-n"></i> 네이버</div>
+              <div class="rating-source">
+                <span class="icon naver">N</span> 네이버
+              </div>
               <div class="rating-value">★ {{ selectedRestaurant.naverRating.toFixed(1) }}</div>
             </div>
             <div class="info-item rating-item">
-              <div class="rating-source"><i class="fa-solid fa-k"></i> 카카오</div>
+              <div class="rating-source">
+                <span class="icon kakao">K</span> 카카오
+              </div>
               <div class="rating-value">★ {{ selectedRestaurant.kakaoRating.toFixed(1) }}</div>
             </div>
             <div class="info-item rating-item">
-              <div class="rating-source"><i class="fa-brands fa-google"></i> 구글</div>
+              <div class="rating-source">
+                <i class="fab fa-google icon"></i> 구글
+              </div>
               <div class="rating-value">★ {{ selectedRestaurant.googleRating.toFixed(1) }}</div>
             </div>
           </div>
@@ -308,7 +314,30 @@ onMounted(async () => {
 .rating-source {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
+.rating-source .icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  color: white;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 20px;
+}
+.rating-source .icon.naver {
+  background-color: #03C75A;
+}
+.rating-source .icon.kakao {
+  background-color: #FEE500;
+  color: #191919;
+}
+.rating-source .fa-google {
+  color: #DB4437;
+}
+
 .rating-value {
   font-weight: 700;
   color: #ffc107;

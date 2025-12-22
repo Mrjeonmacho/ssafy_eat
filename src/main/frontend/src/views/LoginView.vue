@@ -70,89 +70,116 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
 .auth-container {
+  font-family: 'Noto Sans KR', sans-serif;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: #f8f9fa;
+  min-height: 100vh;
+  background-color: #ecf0f1;
 }
+
 .title {
-  font-size: 2.5em;
+  font-size: 3em;
   font-weight: 700;
-  color: #007bff;
-  margin-bottom: 30px;
+  color: #3498db;
+  margin-bottom: 40px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
+
 .form-container {
   background: #ffffff;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 50px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   text-align: center;
 }
+
 h2 {
   margin-top: 0;
-  margin-bottom: 25px;
-  color: #343a40;
+  margin-bottom: 30px;
+  color: #2c3e50;
+  font-size: 1.8em;
+  font-weight: 700;
 }
+
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   text-align: left;
 }
+
 .form-group label {
   display: block;
-  margin-bottom: 8px;
-  color: #495057;
+  margin-bottom: 10px;
+  color: #7f8c8d;
   font-weight: 700;
+  font-size: 0.9em;
 }
+
 .form-group input {
   width: 100%;
-  padding: 12px 15px;
-  border: 1px solid #ced4da;
-  border-radius: 8px;
+  padding: 15px;
+  border: 2px solid #dde4e6;
+  border-radius: 10px;
   box-sizing: border-box;
   font-size: 1em;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
 }
+
 .form-group input:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  border-color: #3498db;
+  box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
 }
+
 button {
-  background-color: #007bff;
+  background: #3498db;
   color: white;
-  padding: 12px 20px;
+  padding: 15px 20px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 1.1em;
+  font-size: 1.2em;
   font-weight: 700;
   width: 100%;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
+
 button:hover {
-  background-color: #0056b3;
+  background-color: #2980b9;
+  transform: translateY(-2px);
 }
+
 .message {
-  margin-top: 20px;
-  font-size: 0.9em;
-  min-height: 20px;
-}
-.message.success { color: green; }
-.message.error { color: red; }
-.switch-form-link {
   margin-top: 25px;
-  font-size: 0.9em;
+  font-size: 1em;
+  min-height: 24px;
 }
+
+.message.success {
+  color: #27ae60;
+}
+
+.message.error {
+  color: #e74c3c;
+}
+
+.switch-form-link {
+  margin-top: 30px;
+  font-size: 1em;
+}
+
 .switch-form-link a {
-  color: #007bff;
+  color: #3498db;
   text-decoration: none;
   font-weight: 700;
 }
+
 .switch-form-link a:hover {
   text-decoration: underline;
 }
