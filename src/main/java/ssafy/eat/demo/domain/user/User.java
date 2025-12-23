@@ -25,6 +25,7 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
     // ManyToMany relationship with Restaurant for wishlist
     // FetchType.LAZY는 기본값이지만 명시적으로 지정하여 지연 로딩임을 강조
     @ManyToMany(fetch = FetchType.LAZY)
@@ -35,6 +36,7 @@ public class User {
     )
     @Builder.Default
     private Set<Restaurant> wishlist = new HashSet<>();
+
     // 찜 목록 관리를 위한 헬퍼 메서드
     // 현재 인메모리로 써서 기능안쓰지만, db연결하면 기능 쓰면 됨
     public void addRestaurantToWishlist(Restaurant restaurant) {

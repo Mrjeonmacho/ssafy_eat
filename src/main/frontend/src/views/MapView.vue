@@ -65,6 +65,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useWishlistStore } from '@/stores/wishlist'
 
 declare global {
   interface Window {
@@ -87,10 +88,12 @@ interface RestaurantDto {
 }
 
 const authStore = useAuthStore()
+const wishlistStore = useWishlistStore()
 const router = useRouter()
 const isPanelOpen = ref(false)
 const selectedRestaurant = ref<RestaurantDto | null>(null)
 let map: any = null
+let markers: any[] = []; // Array to store markers
 
 const loadKakaoMapScript = () => {
   return new Promise<void>((resolve) => {
@@ -115,25 +118,47 @@ const initMap = () => {
   map = new window.kakao.maps.Map(mapContainer, mapOption);
 };
 
+const clearMarkers = () => {
+  markers.forEach(marker => marker.setMap(null));
+  markers = [];
+}
+
 const closePanel = () => {
   isPanelOpen.value = false
 }
 
 const fetchAndDisplayRestaurants = async () => {
+  clearMarkers(); // Clear existing markers before drawing new ones
   try {
     const response = await fetch('/api/restaurants')
     if (!response.ok) throw new Error('맛집 목록을 불러오는 데 실패했습니다.')
     const restaurants: RestaurantDto[] = await response.json()
+
+    const redMarkerImgSrc = 'http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png';
+    const imageSize = new window.kakao.maps.Size(24, 35);
+    const redMarkerImage = new window.kakao.maps.MarkerImage(redMarkerImgSrc, imageSize);
+
 
     restaurants.forEach(restaurant => {
       const markerPosition = new window.kakao.maps.LatLng(
         restaurant.latitude,
         restaurant.longitude
       )
-      const marker = new window.kakao.maps.Marker({
-        position: markerPosition
-      });
+      
+      const isWishlisted = wishlistStore.isWishlisted(restaurant.id);
+      
+      const markerOptions: any = {
+        position: markerPosition,
+      };
+
+      if (isWishlisted) {
+        markerOptions.image = redMarkerImage;
+      }
+      
+      const marker = new window.kakao.maps.Marker(markerOptions);
+      
       marker.setMap(map);
+      markers.push(marker); // Add new marker to the array
 
       window.kakao.maps.event.addListener(marker, 'click', async () => {
         try {
@@ -164,13 +189,18 @@ const addToWishlist = async () => {
     return
   }
 
+  const restaurantId = selectedRestaurant.value.id
+
   try {
     const response = await fetch(
-      `/api/users/${authStore.userId}/wishlist/${selectedRestaurant.value.id}`,
+      `/api/users/${authStore.userId}/wishlist/${restaurantId}`,
       { method: 'POST' }
     )
     if (response.ok) {
       alert('찜 목록에 추가되었습니다!')
+      wishlistStore.addToWishlist(restaurantId)
+      // Re-render markers to update color
+      fetchAndDisplayRestaurants();
     } else if (response.status === 409) {
       alert('이미 찜한 식당입니다.')
     } else {
@@ -192,6 +222,8 @@ onMounted(async () => {
 
   await loadKakaoMapScript();
   initMap();
+  // Fetch wishlist first to know which markers should be red
+  await wishlistStore.fetchWishlist(authStore.userId);
   fetchAndDisplayRestaurants();
 });
 </script>
@@ -259,12 +291,6 @@ onMounted(async () => {
   font-size: 1.1em;
   color: #6c757d;
   margin-top: 5px;
-}
-
-.panel-content {
-  padding: 20px;
-  flex-grow: 1;
-  overflow-y: auto;
 }
 
 .panel-close-btn {

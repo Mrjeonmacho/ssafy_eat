@@ -1,30 +1,25 @@
 package ssafy.eat.demo.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ssafy.eat.demo.domain.restaurant.Restaurant;
 import ssafy.eat.demo.domain.user.User;
 import ssafy.eat.demo.dto.restaurant.RestaurantDetailDto;
+import ssafy.eat.demo.repository.RestaurantRepository;
 import ssafy.eat.demo.repository.UserRepository;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
-    private final RestaurantService restaurantService;
-
-    private final Map<Long, Set<RestaurantDetailDto>> userWishlists = new ConcurrentHashMap<>();
-
-    public UserService(UserRepository userRepository, RestaurantService restaurantService) {
-        this.userRepository = userRepository;
-        this.restaurantService = restaurantService;
-    }
+    private final RestaurantRepository restaurantRepository; // RestaurantRepository 주입
 
     @Transactional
     public User registerUser(String username, String password) {
@@ -35,55 +30,63 @@ public class UserService {
                 .username(username)
                 .password(password)
                 .build();
-        User savedUser = userRepository.save(newUser);
-        userWishlists.put(savedUser.getId(), new HashSet<>());
-        return savedUser;
+        return userRepository.save(newUser);
     }
 
     public Optional<User> login(String username, String password) {
-        Optional<User> userOptional = userRepository.findByUsername(username);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (user.getPassword().equals(password)) {
-                userWishlists.putIfAbsent(user.getId(), new HashSet<>());
-                return Optional.of(user);
-            }
-        }
-        return Optional.empty();
+        return userRepository.findByUsername(username)
+                .filter(user -> user.getPassword().equals(password));
     }
 
     @Transactional
     public void addRestaurantToWishlist(Long userId, Long restaurantId) {
-        userWishlists.putIfAbsent(userId, new HashSet<>());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found with ID: " + restaurantId));
 
-        Optional<RestaurantDetailDto> restaurantOptional = restaurantService.getRestaurantById(restaurantId);
-        if (restaurantOptional.isEmpty()) {
-            throw new IllegalArgumentException("Restaurant not found with ID: " + restaurantId);
-        }
-        RestaurantDetailDto restaurant = restaurantOptional.get();
-
-        boolean added = userWishlists.get(userId).add(restaurant);
-        if (!added) {
+        if (user.getWishlist().contains(restaurant)) {
             throw new IllegalArgumentException("이미 찜한 식당입니다.");
         }
+
+        // Helper method 사용
+        user.addRestaurantToWishlist(restaurant);
+        // @Transactional에 의해 user의 변경사항이 자동으로 DB에 반영됩니다.
     }
 
     @Transactional
-    public Set<RestaurantDetailDto> removeRestaurantFromWishlist(Long userId, Long restaurantId) {
-        Set<RestaurantDetailDto> wishlist = userWishlists.get(userId);
-        if (wishlist == null) {
-            throw new IllegalArgumentException("User or wishlist not found for ID: " + userId);
-        }
-
-        wishlist.removeIf(r -> r.getId().equals(restaurantId));
-        return wishlist;
+    public void removeRestaurantFromWishlist(Long userId, Long restaurantId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found with ID: " + restaurantId));
+        
+        // Helper method 사용
+        user.removeRestaurantFromWishlist(restaurant);
     }
 
     public Set<RestaurantDetailDto> getUserWishlist(Long userId) {
-        Set<RestaurantDetailDto> wishlist = userWishlists.get(userId);
-        if (wishlist == null) {
-            throw new IllegalArgumentException("User or wishlist not found for ID: " + userId);
-        }
-        return wishlist;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+
+        return user.getWishlist().stream()
+                .map(this::convertToDetailDto)
+                .collect(Collectors.toSet());
+    }
+
+    private RestaurantDetailDto convertToDetailDto(Restaurant restaurant) {
+        return new RestaurantDetailDto(
+                restaurant.getId(),
+                restaurant.getName(),
+                restaurant.getAddress(),
+                restaurant.getPhone(),
+                restaurant.getDescription(),
+                restaurant.getCuisineType(),
+                restaurant.getNaverRating() != null ? restaurant.getNaverRating().getRating() : null,
+                restaurant.getKakaoRating() != null ? restaurant.getKakaoRating().getRating() : null,
+                restaurant.getGoogleRating() != null ? restaurant.getGoogleRating().getRating() : null,
+                restaurant.getLatitude(),
+                restaurant.getLongitude()
+        );
     }
 }
