@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -46,85 +47,91 @@ public class NaverRestaurantCrawler implements CommandLineRunner {
 
             driver.get("https://map.naver.com/v5/search/역삼 밥집");
 
+            String originalWindow = driver.getWindowHandle();
+
             wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("searchIframe"));
-            
+
             loadAllPlacesByWheel(driver);
-            
+
             List<WebElement> places = driver.findElements(By.cssSelector("li.UEzoS"));
             int count = places.size();
-            
+
             if (count == 0) {
                 System.out.println("크롤링 실패: 맛집 목록을 찾지 못했습니다.");
                 return;
             }
 
             System.out.println("크롤링 대상 개수: " + count);
-            String prevName = ""; // 이전 가게 이름 저장 변수
 
             for (int i = 0; i < Math.min(count, MAX_COUNT); i++) {
+                // StaleElementReferenceException을 피하기 위해 매번 목록을 다시 찾음
                 List<WebElement> currentPlaces = driver.findElements(By.cssSelector("li.UEzoS"));
+                if (i >= currentPlaces.size()) {
+                    System.out.println("목록의 끝에 도달하여 크롤링을 중단합니다.");
+                    break;
+                }
                 WebElement targetLi = currentPlaces.get(i);
 
                 js.executeScript("arguments[0].scrollIntoView({block: 'center'});", targetLi);
-                
+                Thread.sleep(300);
+
                 String previewName = targetLi.findElement(By.cssSelector("span.TYaxT")).getText();
                 System.out.println((i + 1) + "번째 | 크롤링 시도: " + previewName);
-                
-                WebElement clickable = targetLi.findElement(By.cssSelector("a"));
-                js.executeScript("arguments[0].click();", clickable);
-                Thread.sleep(1000);
 
-                driver.switchTo().defaultContent();
-                
-                // URL이 변경될 때까지 대기
+                // 1. 목록 아이템 클릭
+                js.executeScript("arguments[0].click();", targetLi);
+
                 try {
-                    wait.until(d -> d.getCurrentUrl().contains("/place/"));
+                    // 2. entryIframe 리셋 및 로드 대기 (SPA의 비동기 동작에 대응)
+                    driver.switchTo().defaultContent();
+                    wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("entryIframe")));
+                    wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("entryIframe"));
+
+                    // 3. Iframe URL에서 placeId 추출
+                    String entryUrl = driver.getCurrentUrl();
+                    Matcher matcher = Pattern.compile("/place/(\\d+)").matcher(entryUrl);
+                    if (!matcher.find()) {
+                        System.out.println("   > 스킵 (entryIframe URL에서 placeId 없음)");
+                        continue; // finally 블록으로 가서 복귀 로직 수행
+                    }
+                    String placeId = matcher.group(1);
+
+                    // 4. 데이터 추출
+                    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("h1")));
+                    String name = driver.findElement(By.cssSelector("h1")).getText();
+
+                    boolean shouldSkip = false;
+                    if (name.isEmpty() || restaurantRepository.findByName(name).isPresent()) {
+                        System.out.println("   > 스킵 (이름이 없거나 이미 존재: " + name + ")");
+                        shouldSkip = true;
+                    }
+
+                    if (!shouldSkip) {
+                        String address = safeText(driver, "span.LDgIH");
+                        double naverRating = 0.0; // 별점은 다음 단계에서 추출
+                        double latitude = 0.0, longitude = 0.0; // 좌표는 다음 단계에서 추출
+
+                        Restaurant restaurant = Restaurant.builder()
+                                .name(name)
+                                .address(address)
+                                .description("")
+                                .cuisineType("")
+                                .latitude(latitude)
+                                .longitude(longitude)
+                                .naverRating(new NaverRating(naverRating))
+                                .kakaoRating(new KakaoRating(0.0))
+                                .googleRating(new GoogleRating(0.0))
+                                .build();
+                        restaurantRepository.save(restaurant);
+                        System.out.println("   > 저장 완료: " + name);
+                    }
                 } catch (TimeoutException e) {
-                    System.out.println("   > 스킵 (URL 변경 감지 실패)");
-                    returnToSearch(driver);
-                    continue;
+                    System.out.println("   > 스킵 (entryIframe 로드 시간 초과)");
+                } finally {
+                    // 5. 원래의 searchIframe으로 복귀
+                    driver.switchTo().defaultContent();
+                    driver.switchTo().frame("searchIframe");
                 }
-                
-                // 상세 페이지 타입에 따라 iframe 전환 또는 현재 페이지에서 작업
-                if (driver.findElements(By.id("entryIframe")).isEmpty()) {
-                     // Iframe이 없는 경우, 현재 페이지에서 바로 정보 추출
-                } else {
-                    driver.switchTo().frame("entryIframe");
-                }
-                
-                // 방어적으로 가게명 추출
-                List<WebElement> nameEls = driver.findElements(By.cssSelector("span.Fc1rA"));
-                if (nameEls.isEmpty()) {
-                    System.out.println("   > 스킵 (상세 페이지 구조 다름, 가게명 없음)");
-                    returnToSearch(driver);
-                    continue;
-                }
-                String name = nameEls.get(0).getText();
-
-                if (name.isEmpty() || restaurantRepository.findByName(name).isPresent()) {
-                    System.out.println("   > 스킵 (이름이 없거나 이미 존재: " + name + ")");
-                    returnToSearch(driver);
-                    continue;
-                }
-
-                String address = safeText(driver, "span.LDgIH");
-                String ratingText = safeText(driver, "span.PXMot");
-                double naverRating = ratingText.isEmpty() ? 0.0 : Double.parseDouble(ratingText.replace("별점", "").trim());
-
-                double latitude = 0.0, longitude = 0.0;
-                String currentUrl = driver.getCurrentUrl();
-                Pattern pattern = Pattern.compile("c=([0-9.]+),([0-9.]+)");
-                Matcher matcher = pattern.matcher(currentUrl);
-                if (matcher.find()) {
-                    longitude = Double.parseDouble(matcher.group(1));
-                    latitude = Double.parseDouble(matcher.group(2));
-                }
-
-                Restaurant restaurant = Restaurant.builder().name(name).address(address).description("").cuisineType("").latitude(latitude).longitude(longitude).naverRating(new NaverRating(naverRating)).kakaoRating(new KakaoRating(0.0)).googleRating(new GoogleRating(0.0)).build();
-                restaurantRepository.save(restaurant);
-                System.out.println("   > 저장 완료: " + name);
-
-                returnToSearch(driver);
             }
 
             System.out.println("✅ 크롤링 완료!");
@@ -157,15 +164,6 @@ public class NaverRestaurantCrawler implements CommandLineRunner {
             return driver.findElement(By.cssSelector(selector)).getText();
         } catch (Exception e) {
             return "";
-        }
-    }
-
-    private void returnToSearch(WebDriver driver) {
-        try {
-            driver.switchTo().defaultContent();
-            wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt("searchIframe"));
-        } catch (Exception e) {
-            System.err.println("searchIframe으로 돌아가는 중 오류 발생, 무시하고 진행");
         }
     }
 }
